@@ -60,6 +60,7 @@ class _SpecificUserOrdersScreenState extends State<SpecificUserOrdersScreen> {
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (context,index){
                     final data=snapshot.data!.docs[index];
+                    String orderDocId=data.id;
                     OrderModel orderModel=OrderModel(
                       productId: data['productId'],
                       categoryId: data['categoryId'],
@@ -108,7 +109,15 @@ class _SpecificUserOrdersScreenState extends State<SpecificUserOrdersScreen> {
 
                           ],
                         ),
-                        trailing: Icon(Icons.edit),
+                        trailing: InkWell(
+                          onTap: (){
+                            showBottomSheet(
+                              userDocId:widget.docId,
+                              orderModel:orderModel,
+                              orderDocId:orderDocId
+                            );
+                          },
+                            child: Icon(Icons.more_vert)),
                       ),
                     );
                   }
@@ -118,6 +127,59 @@ class _SpecificUserOrdersScreenState extends State<SpecificUserOrdersScreen> {
             return Container();
           }
       ),
+    );
+  }
+  void showBottomSheet({
+    required String userDocId,
+    required OrderModel orderModel,
+    required String orderDocId,
+  }){
+    Get.bottomSheet(
+      Container(
+        height: Get.height/2,
+        margin: EdgeInsets.only(bottom: 10.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.0)
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                    onPressed: () async{
+                      await FirebaseFirestore.instance
+                          .collection('orders')
+                          .doc(userDocId)
+                          .collection('ConfirmOrders')
+                          .doc(orderDocId).set({
+                        'status':false,
+                      },
+                      );
+                    },
+                    child: Text('Pending')
+                ),
+                ElevatedButton(
+                    onPressed: () async{
+                      await FirebaseFirestore.instance
+                          .collection('orders')
+                          .doc(userDocId)
+                          .collection('ConfirmOrders')
+                          .doc(orderDocId).update({
+                        'status':true,
+                      },
+                      );
+                    },
+                    child: Text('Deliverd')
+                ),
+              ],
+            )
+          ],
+        ),
+
+      )
     );
   }
 }
