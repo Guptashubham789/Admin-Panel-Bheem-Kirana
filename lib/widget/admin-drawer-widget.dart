@@ -1,5 +1,6 @@
 import 'package:admin_grocery/view/all-orders-screen.dart';
 import 'package:admin_grocery/view/all-users-screen.dart';
+import 'package:admin_grocery/view/product/all-product-screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -82,6 +83,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: ListTile(
+                onTap: (){
+                  Get.to(()=>AllProductScreen());
+                },
                 titleAlignment: ListTileTitleAlignment.center,
                 title: Text("Product"),
                 leading: Icon(Icons.production_quantity_limits),

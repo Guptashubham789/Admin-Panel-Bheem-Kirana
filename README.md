@@ -143,4 +143,144 @@ Step 2 : (Get real time users data from firebase flutter using getx )
 Step 3 : (Get real time users orders from firebase flutter (Part 1))
 -----------------------------------------------------------------------
 Step 4 : (How to handle order status of flutter ecommerce app)
+
 ---------------------------------------------------------------
+Step 5 : (Part-1) Pick multiple images from camera and gallery flutter
+-----------------------------
+1. sabse phle ek screen bnana hai 
+   2. phir ek controller bnana hai 
+      3. Dependency add
+               image_picker:,device_init_plus:,intl:,permission_handler:,app_setting,
+               firebase_storage:
+               import 'package:device_info_plus/device_info_plus.dart';
+               import 'package:firebase_storage/firebase_storage.dart';
+               import 'package:flutter/material.dart';
+               import 'package:get/get.dart';
+               import 'package:image_picker/image_picker.dart';
+               import 'package:permission_handler/permission_handler.dart';
+      
+               class AddProductImagesController extends GetxController{
+               final ImagePicker _picker=ImagePicker();
+               RxList<XFile> selectedImages =<XFile>[].obs;
+      
+             final RxList<String> arrImagesUrl= <String>[].obs;
+             final FirebaseStorage storageRef=FirebaseStorage.instance;
+             Future<void> showImagesPickerDialog() async{
+                 PermissionStatus status;
+                 DeviceInfoPlugin deviceInfoPlugin=DeviceInfoPlugin();
+                 AndroidDeviceInfo androidDeviceInfo=await deviceInfoPlugin.androidInfo;
+
+           if(androidDeviceInfo.version.sdkInt<=32){
+               status=await Permission.storage.request();
+           }else{
+               status=await Permission.mediaLibrary.request();
+           }
+           //
+           if(status==PermissionStatus.granted){
+               Get.defaultDialog(
+                   title: "Choose Image",
+                   middleText: "Pick an image from the camera or gallery?",
+                   actions: [
+                       ElevatedButton(
+                           onPressed: (){},
+                           child: Text('Camera')
+                       ),
+                       ElevatedButton(
+                           onPressed: (){},
+                           child: Text('Gallery')
+                       ),
+                   ]
+
+               );
+           }
+
+           if(status== PermissionStatus.denied){
+               Get.snackbar("Error", "Please allow permission for further usage..");
+               openAppSettings();
+           }
+           if(status== PermissionStatus.permanentlyDenied){
+               Get.snackbar("Error", "Please allow permission for further usage..");
+               openAppSettings();
+           }
+       }
+         }
+      
+Step : (camera and gallery ))
+------------------------
+selectedImage("camera");
+selectedImage("gallery");
+
+    Future<void> selectedImage(String type)async{
+        List<XFile> imgs=[];
+        if(type=='gallery'){
+            try{
+                imgs=await _picker.pickMultiImage(imageQuality: 80);
+                update();
+            }catch(e){
+                Get.snackbar("Error", "error gallery not open");
+            }
+        }else{
+            final img=await _picker.pickImage(source: ImageSource.camera,imageQuality: 80);
+
+            if(img != null){
+                imgs.add(img);
+                update();
+            }
+        }
+        if(imgs.isEmpty){
+            selectedImages.addAll(imgs);
+            update();
+        }
+    }
+
+Step : Display selected images in gridview builder using image picker
+---------------------------------------------------------------
+addscreen pr
+------------
+            GetBuilder<AddProductImagesController>(
+              init: AddProductImagesController(),
+                builder: (addProductImagesController){
+                return addProductImagesController.selectedImages.length>0
+                    ?Container(
+                  width: Get.width-20,
+                  height: Get.height/3.0,
+                  child: GridView.builder(
+                    itemCount: addProductImagesController.selectedImages.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 20,
+                        crossAxisSpacing: 10,
+                      ),
+                      itemBuilder: (BuildContext context,int index){
+                      return Stack(
+                        children: [
+                          Image.file(
+                            File(addProductImagesController.selectedImages[index].path),
+                            fit: BoxFit.cover,
+                            height: Get.height/4,
+                            width: Get.width/2,
+                          ),
+                          Positioned(child: InkWell(
+                            onTap: (){
+                              addProductImagesController.removeImage(index);
+                            },
+                            child: CircleAvatar(
+                              backgroundColor: AppConstant.appMainColor,
+                              child: Icon(Icons.close,color: AppConstant.appTextColor,),
+                            ),
+                          ))
+                        ],
+                      );
+                      },
+                  ),
+                )
+                    :SizedBox.shrink();
+            }),
+
+Delete images
+--------------
+      void removeImage(int index){
+      selectedImages.removeAt(index);
+      update();
+      }
+
