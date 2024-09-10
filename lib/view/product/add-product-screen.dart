@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:admin_grocery/utils/app-constant.dart';
+import 'package:admin_grocery/view/category-dropdown-controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -10,6 +11,7 @@ import '../../controllers/product-images-controller.dart';
 class AddProductScreen extends StatelessWidget {
    AddProductScreen({super.key});
    AddProductImagesController addProductImagesController=Get.put(AddProductImagesController());
+   CategoryDropDownController categoryDropDownController=Get.put(CategoryDropDownController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
